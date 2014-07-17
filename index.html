@@ -1,74 +1,406 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Aries94.github.com : " />
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Aries94.github.com</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aries</title>
   </head>
+  <body style='background: #000; margin: 0; padding: 0; width: 100%; height: 100%;'>
+    <canvas id='display' width='1' height='1' style='width: 100%; height: 100%;' />
 
-  <body>
+    <script>
+        
+//________________Controls_____________________________________
+        var CIRCLE = Math.PI * 2;
+        var MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/Aries94">View on GitHub</a>
 
-          <h1 id="project_title">Aries94.github.com</h1>
-          <h2 id="project_tagline"></h2>
+        function Controls() {
+            this.codes = { 37: 'left', 39: 'right', 38: 'forward', 40: 'backward' };
+            this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false };
+            document.addEventListener('keydown', this.onKey.bind(this, true), false);
+            document.addEventListener('keyup', this.onKey.bind(this, false), false);
+            document.addEventListener('touchstart', this.onTouch.bind(this), false);
+            document.addEventListener('touchmove', this.onTouch.bind(this), false);
+            document.addEventListener('touchend', this.onTouchEnd.bind(this), false);
+        }
 
-        </header>
-    </div>
+        //----------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------*/
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+        Controls.prototype.onTouch = function (e) {
+            var t = e.touches[0];
+            this.onTouchEnd(e);
+            if (t.pageY < window.innerHeight * 0.5) this.onKey(true, { keyCode: 38 });
+            else if (t.pageX < window.innerWidth * 0.5) this.onKey(true, { keyCode: 37 });
+            else if (t.pageY > window.innerWidth * 0.5) this.onKey(true, { keyCode: 39 });
+        };
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+        //----------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------*/
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+        Controls.prototype.onTouchEnd = function (e) {
+            this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false };
+            e.preventDefault();
+            e.stopPropagation();
+        };
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        //----------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------*/
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+        Controls.prototype.onKey = function (val, e) {
+            var state = this.codes[e.keyCode];
+            if (typeof state === 'undefined') return;
+            this.states[state] = val;
+            e.preventDefault && e.preventDefault();
+            e.stopPropagation && e.stopPropagation();
+        };
+//__________________Bitmap_________________________________________
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+        function Bitmap(src, width, height) { //íîâîå èçîáðàæåíèå
+            this.image = new Image();  //âûäåëåíèå ïàìÿòè
+            this.image.src = src;   //çàãðóçà èçîáðàæåíèÿ
+            this.width = width; //øèðèíà â ïèêñåëÿõ
+            this.height = height;//âûñîòà â ïèêñåëÿõ
+        }
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+//__________________Player_________________________________________
+        function Player(x, y, direction) {
+            this.x = x; //òåêóùèå êîîðäèíàòû
+            this.y = y; //
+            this.direction = direction; //íàïðàâëåíèå âçãëÿäà
+            this.weapon = new Bitmap('screwdriver.png', 335, 309); //îðóæèå 
+            this.paces = 0; //ïðîéäåííîå ðàññòîÿíèå 
+        }
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+//----------------------------
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+        Player.prototype.rotate = function (angle) { //ïîâîðîò íà óêàçàííûé óãîë
+            this.direction = (this.direction + angle + CIRCLE) % (CIRCLE); // CIRCLE = äâà ïè. óãîë âñåãäà îò 0 äî 2ïè
+        };
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+//----------------------------
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+        Player.prototype.walk = function (distance, map) {  //ïåðåìåùåíèå âïåðåä-íàçàä (ðàññòîÿíèå è êàðòà(÷òîáû çíàòü, ãäå ñòåíû))
+            var dx = Math.cos(this.direction) * distance; //çíàÿ óãîë, ïîä êîòîðûì èäåì, è ðàññòîÿíèå, êîòîðîå íóæíî ïðîéòè, ëåãêî 
+            var dy = Math.sin(this.direction) * distance; // ïðîåêòèðóåì âñ¸ íà îñè
+            if (map.get(this.x + dx, this.y) <= 0) this.x += dx; //ïðîâåðÿåì, íåò ëè ñòåíû òàì, êóäà õîòèì ïîéòè, è èäåì
+            if (map.get(this.x, this.y + dy) <= 0) this.y += dy;// ïî èêñàì è èãðèêàì îòäåëüíî, ÷òîáû ìîæíî áûëî ñêîëüçèòü âäîëü ñòåíû
+            this.paces += distance; //óâåëè÷èâàåì ïðîéäåííîå ðàññòîÿíèå
+        };
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
+//-----------------------------
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+        Player.prototype.update = function (controls, map, seconds) { //îáíîâëåíèå êîîðäèíàò ïðè ïåðåìåùåíèèè
+            if (controls.left) this.rotate(-Math.PI * seconds); //ïîâîðîò íà 90 ãðàäóñîâ çà åäèíèöó âðåìåíè
+            if (controls.right) this.rotate(Math.PI * seconds);
+            if (controls.forward) this.walk(3 * seconds, map); //õîäüáà íà 3 çà åäèíèöó âðåìåíè
+            if (controls.backward) this.walk(-3 * seconds, map);//êàðòà íóæíà, ÷òîáû íå õîäèòü ñêâîçü ñòåíû
+        };
+//__________________Map_____________________________________________
 
-    
+        function Map(size) { //ñîçäàíèå íîâîé êàðòû óêàçàííîãî ðàçìåðà
+            this.size = size; //ðàçìåð êàðòû
+            this.wallGrid = new Uint8Array(size * size); // ñàìà êàðòà - îäíîìåðíûé ìàñèâ èç òèïîâ áëîêîâ (íèæå áóäåò ìåòîä ïåðåâîäà â äâóìåðíûé è íàîáîðîò)
+            this.skybox = new Bitmap('deathvalley_panorama.jpg', 2000, 750); //òåêñòóðà íåáà è ðàçìåð â ïèêñåëÿõ
+            var wallTexture = new Bitmap('wall_texture.jpg', 1024, 1024); //òåêñòóðà îáû÷íûõ ñòåí è ðàçìåð â ïèêñåëÿõ
+            var tardisTexture = new Bitmap('tardis2.png', 1024, 1024); //òåêñòóðà ïåðåäíåé ÷àñòè áóäêè è ðàçìåð â ïèêñåëÿõ
+            var tardis2Texture = new Bitmap('tardis3.png', 1024, 1024); //òåêñòóðà áîêîâîé è çàäíåé ÷àñòåé áóäêè è ðàçìåð â ïèêñåëÿõ
+            this.light = 0; //îñâåùåíèå êàðòû
+            this.block_height = [0, 2, 0.9];  //âûñîòû áëîêîâ. h[0] = ïóñòîòà h[1] = ñòåíà h[2] = òàðäèñ
+            this.texture = [wallTexture, tardisTexture, tardis2Texture]; //ìàññèâ òåêñòóð
+        }
 
+//----------------------------------
+
+        Map.prototype.get = function (x, y) {//íàõîäèò íîìåð ÿ÷åéêè â ìàññèâå ïî êîîðäèíàòàì
+            x = Math.floor(x);//áåðåì öåëóþ ÷àñòü îò òåêóùèõ êîîðäèíàò èãðîêà
+            y = Math.floor(y);//
+            if (x < 0 || x > this.size - 1 || y < 0 || y > this.size - 1) return -1;//âîçâðàùàåò -1, åñëè èãðîê çà ïðåäåëàìè êàðòû
+            return this.wallGrid[y * this.size + x];//åñëè â ïðåäåëàõ, òî íàõîäèò íîìåð
+        };
+
+//------------------------------------
+
+        Map.prototype.randomize = function () { //ñëó÷àéíàÿ ãåíåðàöèÿ ìèðà
+            for (var i = 0; i < this.size * this.size; i++) { //ïðîõîäèì ïî âñåìó ìàñèâó
+                this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0; // è â êàæäóþ ÿ÷åéêó ñ îïðåäåëåííîé âåðîÿòíîñòüþ ñòàâèì ñòåíó
+            }
+            for (var j = 0; j < this.size; j++) {                       //ñòàâèì ñòåíû íà 
+                this.wallGrid[j] = 1;                                   //ãðàíèöû êàðòû
+                this.wallGrid[(this.size - 1) + this.size * j] = 1;     //
+                this.wallGrid[this.size * j] = 1;                       //
+                this.wallGrid[this.size * (this.size - 1) + j] = 1;     //
+            }
+            var k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//âûáèðàåì ñëó÷àéíóþ ÿ÷åéêó ìàñèâà
+            while (this.wallGrid[k] != 0) {                                         //äî òåõ ïîð, ïîêà
+                k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//îíà íå îêàæåòñÿ ïóñòîé
+            }
+            this.wallGrid[k] = 2            //ñòàâèì áóäêó â ýòó ÿ÷åéêó
+        };
+
+//-----------------------------------
+
+        Map.prototype.cast = function (point, angle, range) { //íàõîäèò ëó÷ âûïóùåííûé èç óêàçàííîé òî÷êè ïîä çàäàííûì óãëîì, íå ïðåâûùóþùèé ïî äëèíå çàäàííîå ðàññòîÿíèå
+            var self = this;                //ëó÷ áóäåì ïðîâîäèòü ïî äàííîé êàðòå
+            var sin = Math.sin(angle);      //äëÿ ñîêðàùåíèÿ ìåñòà è âðåìåíè ñèíóñ
+            var cos = Math.cos(angle);      //è êîñèíóñ óãëà íàõîäèì
+            var noWall = { length2: Infinity };    //íîÂîëë - â ñëó÷àå, åñëè ëó÷ ïàðàëëåëåí îäíîé èç îñè. Òîãäà îí î÷åâèäíî íå ñìîæåò å¸ ïåðåñå÷ü 
+            //ïîä ëó÷îì ïîíèìàåòñÿ ìàññèâ èç ñïèñêà òèïîâ áëîêîâ, êîòîðûå ëó÷ ïåðåñåêàåò, à òàêæå ìåñòå âõîäà â áëîêè
+            var unsorted_ray = ray({ x: point.x, y: point.y, height: 0, distance: 0, block_type: 0, direction: 'N' });
+            return sorted_ray(unsorted_ray); //ïåðâûé ýëåìåíò - òåêóùàÿ ïîçèöèÿ
+
+
+
+
+            //__________________Ray___________________________________________
+
+            function ray(origin) {       //íà÷èíàåì ìàññèâ ëó÷à ñ ïåðâîãî ýëåìåíòà
+                var stepX = step(sin, cos, origin.x, origin.y); //ïðîâîäèì ëó÷ äî ïåðâîé ãðàíèöû 
+                var stepY = step(cos, sin, origin.y, origin.x, true); //íàõîäèì ïåðåìåùåíèå ïî èêñó è ïî èãðèêó
+                var nextStep = stepX.length2 < stepY.length2    //ñðàâíèâàåì êâàäðàòû ýòèõ ïåðåìåùåíèé, ÷òîáû óçíàòü â êàêîé áëîê ïåðåéäåò ëó÷
+            ? inspect(stepX, 1, 0, origin.distance, stepX.y)    //ëó÷ ïåðåéäåò òóäà, äî êóäà ìåíüøå ðàññòîÿíèå
+            : inspect(stepY, 0, 1, origin.distance, stepY.x);   //ïîýòîìó òåïåðü ëåãêî íàéòè ñëåäóþùèé øàã
+                //â õîäå ïðîâåðêè äëèííà ëèíèè ëó÷à óâåëè÷èëàñü
+
+                if (nextStep.distance > range) return [origin]; //åñëè îíà ïåðåâàëèëè çà ìàêñèìóì, çíà÷èò ëó÷ ãîòîâ
+                return [origin].concat(ray(nextStep));  //åñëè íåò, ðåêóðñèâíî ïðîäîëæàåì
+            }
+
+            //_________________Sorted_Ray_______________________________________
+
+            function sorted_ray(origin) {
+                var i = -1;
+                var j = -1
+                while (++i < origin.length && origin[i].height == 0);
+                var new_ray = [];
+                if (i < origin.length) new_ray[++j] = origin[i];
+                var flag = true; 
+                while (++i < origin.length && flag && origin[i].block_type >= 0) {
+                    if (origin[i].height != 0) {
+                        new_ray[++j] = origin[i];
+                        if (origin[i].height == self.block_height[1]) flag = false;
+                    }
+                }
+                return new_ray;
+            }
+
+            //_________________Step___________________________________________
+
+
+            function step(rise, run, x, y, inverted) {      //èùåì ìåñòî ïåðåñå÷åíèÿ ëó÷à ñî ñëåäóþùèé áëîêîì ïî ãîðèçîíòàëè. Åñëè inverted = true, òî ïî âåðòèêàëè. 
+                if (run === 0) return noWall;   //ïðîâåðÿåì, áóäåò ëè òàêîå ïåðåñå÷åíèå. Åãî ìîæåò íå áûòü, åñëè ëó÷ ïàðàëëåëåí îñè
+                var dx = run > 0 ? Math.floor(x + 1) - x : Math.ceil(x - 1) - x; //íàõîäèì ïåðåìåùåíèå ïî ãîðèçîíòàëè, â çàâèñèìîñòè îò òîãî, âïðàâî èëè âëåâî èäåò ëó÷.
+                var dy = dx * (rise / run); //ïåðåìåùåíèå ïî âåðòèêàëè íàõîäèì, ðåøàÿ ïðÿìîóãîëüíûõ òðåóãîëüíèê
+                return {
+                    x: inverted ? y + dy : x + dx, //âîçâðàùàåì òî÷êó ïåðåñå÷åíèå ñ íîâûì áëîêîì
+                    y: inverted ? x + dx : y + dy,
+                    length2: dx * dx + dy * dy  //è ðàññòîÿíèå, ïðîéäåííîå çà øàã
+                };
+            }
+
+            //__________________Inspect_______________________________________
+            //íàõîäèì ñëåäóùèé øàã. 
+            //
+            function inspect(step, shiftX, shiftY, distance, offset) {
+                var dx = cos < 0 ? shiftX : 0;  //äîáàâêè ê êîîðäèíàòàì, ÷òîáû
+                var dy = sin < 0 ? shiftY : 0;  //íàéòè òî÷êó âíóòðè ñëåäóþùåãî áëîêà
+                step.height = self.block_height[self.get(step.x - dx, step.y - dy)]; //óñàíàâëèâàåò îòîáðàæàåìóþ âûñîòó áëîêîâ
+                step.block_type = self.get(step.x - dx, step.y - dy); //íàõîäèò òèï áëîêà, ÷åðåç êîòîðûé ïðîõîäèò ëó÷
+                step.distance = distance + Math.sqrt(step.length2); //óâåëè÷èâàåò ïðîéäèííóþ ëó÷îì äèñòàíöèþ
+                if (shiftX) {
+                    if (cos < 0) { step.shading = 2; step.direction = 'N'; }
+                    else { step.shading = 0; step.direction = 'S'; }
+                }
+                else {
+                    if (sin < 0) { step.shading = 2; step.direction = 'E'; }
+                    else { step.shading = 1; step.direction = 'W'; }
+                }
+                step.offset = offset - Math.floor(offset);      //íàõîèäèò â êàêîì èìåííî ìåñòå áëîêà ëó÷ ïåðåñåêàþò ãðàíèöó. íåîáõîäèìî äëÿ îòîáðàæåíèÿ íóæíîé ÷àñòè êàðòèíêè
+                return step;
+            }
+        };
+
+//-----------------------------------
+
+        Map.prototype.update = function (seconds) {     //äîáàâëÿåò ìîëíèþ íà êàðòå
+            if (this.light > 0) this.light = Math.max(this.light - 10 * seconds, 0);  //çàòóõàíèå ìîëíèè, åñëè îíà áûëà
+            else if (Math.random() * 5 < seconds) this.light = 2;       //ìîëíèÿ â ñëó÷àéíîå âðåìÿ. 5 - ÷àñòîòà ìîëíèè. 2 - ÿðêîñòü
+        };
+//__________________Camera__________________________________________
+
+       function Camera(canvas, resolution, focalLength) {
+            this.ctx = canvas.getContext('2d'); //"Âåðíåò îáúåêò äâóìåðíîãî êîíòåêñòà"??
+            this.width = canvas.width = window.innerWidth * 0.5; //øèðèíà õîëñòà  ÷èñëî 0,5 êàêèì-òî áîêîì îòâå÷àåò çà ðàçðåøåíèå. ÷åì îíî âûøå, òåì èçîáðàæåíèå ëó÷øå
+            this.height = canvas.height = window.innerHeight * 0.5;//âûñîòà õîëñòà
+            this.resolution = resolution; //ðàçðåøåíèå - êîë-âî ïîëîñîê, íà êîòîðûå áóäåì ðàçáèâàòü ýêðàí
+            this.spacing = this.width / resolution; //øèðèíà îäíî ïîëîñêè
+            this.focalLength = focalLength || 0.3; // ðàññòîÿíèå äî "ëèíçû". åñëè çíà÷åíèÿ íåò, òî âåðíåò 0,3
+            this.range = 30; //äëèíà, íà êîòîðîé âèäíû áëîêè
+            this.lightRange = 5; //íàâåðíî çàòóõàíèå ñâåòà
+            this.scale = (this.width + this.height) / 1500; //ñìàõèâàåò íà ìàñøòàá, íî ñòð¸ìíûé
+        }
+
+//-------------------------------------
+
+
+        Camera.prototype.render = function (player, map) {  //ãëàâíàÿ ôóíêöèÿ îòîáðàæåíèÿ
+            this.drawSky(player.direction, map.skybox, map.light);  //ðèñóåò íåáî
+            this.drawColumns(player, map);  //ñòåíû
+            this.drawWeapon(player.weapon, player.paces); //è îðóæèå
+        };
+
+//------------------------------------
+
+        Camera.prototype.drawSky = function (direction, sky, ambient) { //ðèñóåò íåáî
+            var width = sky.width * (this.height / sky.height) * 2;     //âûñîòà íåáà
+            var left = (direction / CIRCLE) * -width;                   //óñòàíàâëèâàåò íà÷àëüíóþ òî÷êó äëÿ îòîáðàæåíèÿ
+
+            this.ctx.save();                                            //ñîõðàíÿåò õîëñò
+            this.ctx.drawImage(sky.image, left, 0, width, this.height);
+            if (left < width - this.width) {
+                this.ctx.drawImage(sky.image, left + width, 0, width, this.height);
+            }
+            if (ambient > 0) {                                             //ðèñóåò ïîä íèì íåáî
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.globalAlpha = ambient * 0.1;                       //çàòåìíÿåò ðèñóíîê, ÷òîáû ìîëíèÿ íå ñëèøêîì îñâåòëÿëÿ "çåìëþ"
+                this.ctx.fillRect(0, this.height * 0.5, this.width, this.height * 0.5);
+            }
+            this.ctx.restore();                                             //âîññòàíàâëèâàåò õîëñò
+        };
+
+//--------------------------------------
+
+        Camera.prototype.drawColumns = function (player, map) { //ôóíêöèÿ, ðèñóþùàÿ áëîêè
+            this.ctx.save();                                    //ñîõðàíÿåò õîëñò, ðèñóåò áëîêè
+            for (var column = 0; column < this.resolution; column++) { //öèêë ïî êîë-âó âåðòèêàëüíûõ ïîëîñîê (ðàçðåøåíèå)
+                var x = column / this.resolution - 0.5;                 //íóæíî äëÿ îïðåäåëåíèÿ óãëà, ïîä êîòîðûì ñìîòðèì íà äàííóþ ïîëîñêó. "-0,5" - äëÿ òîãî, ÷òîáû èãðîê áûë â öåíòðå
+                var angle = Math.atan2(x, this.focalLength);           //îïðåäåëÿåò óãîë
+                var ray = map.cast(player, player.direction + angle, this.range); //íàõîäèò ëó÷ - ïîñëåäîâàòåëüíîñòü íåïóñòûõ áëîêîâ è òî÷êè âõîäà â íèõ
+               // alert(ray.length);
+                this.drawColumn(column, ray, angle, map);       //ðèñóåò ïîëîñêó
+            }
+            this.ctx.restore();     //âîññòàíàâëèâàåò õîëñò
+        };
+
+//------------------------------------
+
+        Camera.prototype.drawWeapon = function (weapon, paces) {  //ôóêöèÿ, ðèñóþùàÿ îðóæèå. ïåðåäàåò èçîáðàæåíèå îðóæèÿ è ïîêàçàíèÿ øàãîìåòðà
+            var bobX = Math.cos(paces * 2) * this.scale * 6;    //âû÷èñëÿåò äîáàâêè ê âûñîòå è øèðîòå
+            var bobY = Math.sin(paces * 4) * this.scale * 6;    //äëÿ ýôôåêòà õîäüáû
+            var left = this.width * 0.66 + bobX;    //íàõîäèò êîîðäèíàòû äëÿ âåðõíåé ëåâîé
+            var top = this.height * 0.6 + bobY;     //òî÷êè ðèñóíêà
+            this.ctx.drawImage(weapon.image, left, top, weapon.width * this.scale, weapon.height * this.scale); //ñîáñòâåííî ðèñóåò
+        };                  //(ñàì ðèñóíîê, êîîðäèíàòû âåðõíåé ëåâîé òî÷êà, ìàñøòàá) 
+
+//---------------------------------
+
+        Camera.prototype.drawColumn = function (column, ray, angle, map) {  //íîìåð âåðò.ïîëîñêè, ëó÷, êîòîðûé ê íåé èäåò, óãîë ëó÷à è êàðòà
+            if (ray.length > 0) {
+                var ctx = this.ctx;  //õîëñò, íà êîòîðîì ðèñóåì
+                var left = Math.floor(column * this.spacing);   //êîîðäèíàòà êðàéíåé ëåâîé òî÷êè ïîëîñêè íà âñ¸ì õîëñòå
+                var width = Math.ceil(this.spacing);     //øèðèíà ïîëîñêè
+
+                for (var i = ray.length - 1; i >= 0; i--) {
+                    var step = ray[i];
+                    var reverse_texture = 0; //ïîêàçûâàåò, íóæíî ëè ðåâåðñèðîâàòü òåêñòóðó äëÿ ïðàâèëüíîãî îòîáðàæåíèÿ (íå çåðêàëüíîãî)
+                    switch (step.block_type) { //â çàâèñèìîñòè îò òèïà áëîêà íàõîäèì íåîáõîäèìóþ òåêñòóðó
+                        case 1:
+                            {
+                                var texture = map.texture[0]; //îïðåäåëÿåì òåêñòóðó ñòåíû
+                                break;
+                            }
+                        case 2:
+                            {
+                                if (step.direction == 'S') var texture = map.texture[1]; //îïðåäåëÿåò òåêñòóðó äëÿ ëèöåâîé
+                                else { var texture = map.texture[2]; reverse_texture = step.direction == 'E' ? 0 : 1; } //à òàêæå áîêîâîé è çàäíåé ÷àñòè òàðäèñ
+                                break;
+                            }
+                        default:
+                            {
+                                var texture = map.texture[0]; //íà âñÿêèé ñëó÷àé 
+                            }
+                    }
+                    textureX = Math.abs(Math.floor(texture.width * (step.offset - reverse_texture))); //îïðåäåëÿåò êîîðäèíàòó ðèñóåìîé ïîëîñêè íà òåêñòóðå, â çàâèñèìîñòè îò 
+                    //òîãî, ïðîèñõîäèò ëè ðåâåðñèÿ òåêñòóðû
+                    var wall = this.project(step.height, angle, step.distance); //íàõîäèì å¸ âûñîòó è âåðõíþþ òî÷êó
+                    ctx.globalAlpha = 1;    //âûáèðàåì ïðîçðà÷íîñòü ñòåíû
+                    ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //ðèñóåì ïîëîñêó, çíàÿ å¸ òåêñòóðó, êîîðäèíàòû âåðõíåé ëåâîé
+                    //òî÷êè ïîëîñêè íà ñàìîé òåêñòóðå, øèðèíó è âûñîòó ïîëîñêè, âåðõíóþ ëåâóþ òî÷êó ïîëîñêè óæå íà õîëñòå, à òàêæå äëèíó è âûñîòó íà õîëñòå
+                 /*   ctx.fillStyle = '#000000';  //çàòåìíÿÿì ñòåíû
+                    ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
+                    ctx.fillRect(left, wall.top, width, wall.height);*/
+                }
+            }
+        };
+
+
+//-------------------------------
+
+        Camera.prototype.project = function (height, angle, distance) {
+            var z = distance * Math.cos(angle);     //íàõîäèì óñëîâíóþ äëèíó, èíà÷å áóäåò êàçàòüñÿ, ñëîâíî ñìîòðèì â ãëàçîê
+            var wallHeight = this.height * height / z;  //íàõîäèì âèäèìóþ âûñîòó ñòåíû. ÷åì ñòåíà äàëüøå, òåì îíà âèçóàëüíî ìåíüøå
+            var bottom = this.height / 2 * (1 + 1 / z); //íàõîäèò íèæíþþ òî÷êó ñòåíû
+            return {
+                top: bottom - wallHeight,   //âû÷èñëÿåò âåðõíþþ òî÷êó ñòåíû, çíàÿ íèæíþþ è âûñîòó
+                height: wallHeight         
+            };
+        };
+
+//______________________GameLoop____________________________________
+
+
+        function GameLoop() {  //çàöèêëèâàíèå èãðû
+            this.frame = this.frame.bind(this);
+            this.lastTime = 0;
+            this.callback = function () { };
+        }
+
+//----------------------------------
+
+        GameLoop.prototype.start = function (callback) {
+            this.callback = callback;
+            requestAnimationFrame(this.frame);
+        };
+
+//----------------------------------
+
+        GameLoop.prototype.frame = function (time) {
+            var seconds = (time - this.lastTime) / 1000;
+            this.lastTime = time;
+            if (seconds < 0.2) this.callback(seconds);
+            requestAnimationFrame(this.frame);
+        };
+
+//______________________Main________________________________________
+        var display = document.getElementById('display');
+        var player = new Player(5.5, 5.5, Math.PI * 0.3); //èãðîê â óêàçàííûõ êîîðäèíàòàõ è íàïðàâëåíèåì âçãëÿäà
+        var map = new Map(50); //íîâàÿ êàðòà óêàçàííîãî ðàçìåðà 
+        var controls = new Controls(); //çàäàåò óïðàâëåíèå ïåðñîíàæåì
+        var camera = new Camera(display,320, 0.3); //(ýêðàí, íà êîòîðîì ðàáîòàåì ; ðàçðåøåíèå (êîë-âî ïîëîñîê) ; øèðèíà çðåíèÿ)
+        var loop = new GameLoop(); //çàöèêëèâàíèå
+
+        map.randomize();  //ðàíäîìèçàöèÿ êàðòû
+
+        loop.start(function frame(seconds) {
+            map.update(seconds);
+            player.update(controls.states, map, seconds);
+            camera.render(player, map);
+        });
+
+//======================END==========================================
+    </script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-50885475-1', 'playfuljs.com');
+        ga('send', 'pageview');
+    </script>
   </body>
 </html>
+
+  
