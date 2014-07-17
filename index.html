@@ -83,7 +83,7 @@
         Player.prototype.walk = function (distance, map) {  //peremeshhenie vpered-nazad (rasstoyanie i karta(chtoby' znat', gde steny'))
             var dx = Math.cos(this.direction) * distance; //znaya ugol, pod kotory'm idem, i rasstoyanie, kotoroe nuzhno projti, legko 
             var dy = Math.sin(this.direction) * distance; // proektiruem vsyo na osi
-            if (map.get(this.x + dx, this.y) <= 0) this.x += dx; //proveryaem, net li steny' tam, kuda xotim pojti, i idem
+            if (map.get(this.x + dx, this.y) <= 0) this.x += dx; //proveryaem, net li steny' tam, kuda xotim pojti, i idem 
             if (map.get(this.x, this.y + dy) <= 0) this.y += dy;// po iksam i igrikam otdel'no, chtoby' mozhno by'lo skol'zit' vdol' steny'
             this.paces += distance; //uvelichivaem projdennoe rasstoyanie
         };
@@ -100,8 +100,9 @@
 
         function Map(size) { //sozdanie novoj karty' ukazannogo razmera
             this.size = size; //razmer karty'
-            this.wallGrid = new Uint8Array(size * size); // sama karta - odnomerny'j masiv iz tipov blokov (nizhe budet metod perevoda v dvumerny'j i naoborot)
-            this.skybox = new Bitmap('deathvalley_panorama.jpg', 2000, 750); //tekstura neba i razmer v pikselyax
+            this.wallGrid = new Array();
+            for (var i = 0; i < size; i++) { this.wallGrid[i] = new Array(); }  // sama karta - odnomerny'j masiv iz tipov blokov (nizhe budet metod perevoda v dvumerny'j i naoborot)
+            this.skybox = new Bitmap('deathvalley_panorama.jpg', 2000, 750);  //tekstura neba i razmer v pikselyax
             var wallTexture = new Bitmap('wall_texture.jpg', 1024, 1024); //tekstura oby'chny'x sten i razmer v pikselyax
             var tardisTexture = new Bitmap('tardis2.png', 1024, 1024); //tekstura perednej chasti budki i razmer v pikselyax
             var tardis2Texture = new Bitmap('tardis3.png', 1024, 1024); //tekstura bokovoj i zadnej chastej budki i razmer v pikselyax
@@ -116,27 +117,49 @@
             x = Math.floor(x);//berem celuyu chast' ot tekushhix koordinat igroka
             y = Math.floor(y);//
             if (x < 0 || x > this.size - 1 || y < 0 || y > this.size - 1) return -1;//vozvrashhaet -1, esli igrok za predelami karty'
-            return this.wallGrid[y * this.size + x];//esli v predelax, to naxodit nomer
+            return this.wallGrid[y][x];//esli v predelax, to naxodit nomer
         };
 
 //------------------------------------
 
         Map.prototype.randomize = function () { //sluchajnaya generaciya mira
-            for (var i = 0; i < this.size * this.size; i++) { //proxodim po vsemu masivu
-                this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
+            for (var i = 0; i < this.size; i++) { //proxodim po vsemu masivu
+                for (var j = 1; j < this.size - 1; j++) {
+                    this.wallGrid[i][j] = Math.random() < 0.3 ? 1 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
+                }
             }
             for (var j = 0; j < this.size; j++) {                       //stavim steny' na 
-                this.wallGrid[j] = 1;                                   //granicy' karty'
-                this.wallGrid[(this.size - 1) + this.size * j] = 1;     //
-                this.wallGrid[this.size * j] = 1;                       //
-                this.wallGrid[this.size * (this.size - 1) + j] = 1;     //
+                this.wallGrid[0][j] = 1;                                   //granicy' karty'
+                this.wallGrid[this.size - 1][j] = 1;     //
+                this.wallGrid[j][0] = 1;                       //
+                this.wallGrid[j][this.size - 1]  =1   //
             }
-            var k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//vy'biraem sluchajnuyu yachejku masiva
-            while (this.wallGrid[k] != 0) {                                         //do tex por, poka
-                k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//ona ne okazhetsya pustoj
+            var k = Math.floor(Math.abs(Math.random() * this.size - 1));
+            var l = Math.floor(Math.abs(Math.random() * this.size - 1));
+            while (this.wallGrid[k][l] != 0 /*&& this.path_exists()*/) {
+                k = Math.floor(Math.abs(Math.random() * this.size - 1));
+                l = Math.floor(Math.abs(Math.random() * this.size - 1));
             }
-            this.wallGrid[k] = 2            //stavim budku v e'tu yachejku
+            this.wallGrid[k][l] = 2;
+
+            var gread = "";
+            for (var m = 0; m < this.size * this.size; m++) {
+                if (m != 0 && m % this.size == 0)
+                    gread += "\n";
+                l = m % this.size;
+                k = (m - l) / this.size;          
+                gread += this.wallGrid[k][l] + ", ";
+            }
+            alert(gread);
+
+
         };
+
+//-----------------------------------
+
+        Map.prototype.path_exists = function () { //proveryaet, est' li put' ot tardis k igroku
+            
+        }
 
 //-----------------------------------
 
@@ -204,7 +227,7 @@
             function inspect(step, shiftX, shiftY, distance, offset) {
                 var dx = cos < 0 ? shiftX : 0;  //dobavki k koordinatam, chtoby'
                 var dy = sin < 0 ? shiftY : 0;  //najti tochku vnutri sleduyushhego bloka
-                step.height = self.block_height[self.get(step.x - dx, step.y - dy)]; //usanavlivaet otobrazhaemuyu vy'sotu blokov
+                step.height = self.block_height[self.get(step.x - dx,step.y - dy)]; //usanavlivaet otobrazhaemuyu vy'sotu blokov
                 step.block_type = self.get(step.x - dx, step.y - dy); //naxodit tip bloka, cherez kotory'j proxodit luch
                 step.distance = distance + Math.sqrt(step.length2); //uvelichivaet projdinnuyu luchom distanciyu
                 if (shiftX) {
@@ -372,13 +395,17 @@
         };
 
 //______________________Main________________________________________
+       // alert();
         var display = document.getElementById('display');
+       // alert();
+        var map = new Map(10); //novaya karta ukazannogo razmera       
+       // alert(); 
         var player = new Player(5.5, 5.5, Math.PI * 0.3); //igrok v ukazanny'x koordinatax i napravleniem vzglyada
-        var map = new Map(50); //novaya karta ukazannogo razmera 
         var controls = new Controls(); //zadaet upravlenie personazhem
         var camera = new Camera(display,320, 0.3); //(e'kran, na kotorom rabotaem ; razreshenie (kol-vo polosok) ; shirina zreniya)
         var loop = new GameLoop(); //zaciklivanie
 
+       // alert();
         map.randomize();  //randomizaciya karty'
 
         loop.start(function frame(seconds) {
