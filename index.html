@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -56,114 +56,114 @@
         };
 //__________________Bitmap_________________________________________
 
-        function Bitmap(src, width, height) { //íîâîå èçîáðàæåíèå
-            this.image = new Image();  //âûäåëåíèå ïàìÿòè
-            this.image.src = src;   //çàãðóçà èçîáðàæåíèÿ
-            this.width = width; //øèðèíà â ïèêñåëÿõ
-            this.height = height;//âûñîòà â ïèêñåëÿõ
+        function Bitmap(src, width, height) { //novoe izobrazhenie
+            this.image = new Image();  //vy'delenie pamyati
+            this.image.src = src;   //zagruza izobrazheniya
+            this.width = width; //shirina v pikselyax
+            this.height = height;//vy'sota v pikselyax
         }
 
 //__________________Player_________________________________________
         function Player(x, y, direction) {
-            this.x = x; //òåêóùèå êîîðäèíàòû
+            this.x = x; //tekushhie koordinaty'
             this.y = y; //
-            this.direction = direction; //íàïðàâëåíèå âçãëÿäà
-            this.weapon = new Bitmap('screwdriver.png', 335, 309); //îðóæèå 
-            this.paces = 0; //ïðîéäåííîå ðàññòîÿíèå 
+            this.direction = direction; //napravlenie vzglyada
+            this.weapon = new Bitmap('screwdriver.png', 335, 309); //oruzhie 
+            this.paces = 0; //projdennoe rasstoyanie 
         }
 
 //----------------------------
 
-        Player.prototype.rotate = function (angle) { //ïîâîðîò íà óêàçàííûé óãîë
-            this.direction = (this.direction + angle + CIRCLE) % (CIRCLE); // CIRCLE = äâà ïè. óãîë âñåãäà îò 0 äî 2ïè
+        Player.prototype.rotate = function (angle) { //povorot na ukazanny'j ugol
+            this.direction = (this.direction + angle + CIRCLE) % (CIRCLE); // CIRCLE = dva pi. ugol vsegda ot 0 do 2pi
         };
 
 //----------------------------
 
-        Player.prototype.walk = function (distance, map) {  //ïåðåìåùåíèå âïåðåä-íàçàä (ðàññòîÿíèå è êàðòà(÷òîáû çíàòü, ãäå ñòåíû))
-            var dx = Math.cos(this.direction) * distance; //çíàÿ óãîë, ïîä êîòîðûì èäåì, è ðàññòîÿíèå, êîòîðîå íóæíî ïðîéòè, ëåãêî 
-            var dy = Math.sin(this.direction) * distance; // ïðîåêòèðóåì âñ¸ íà îñè
-            if (map.get(this.x + dx, this.y) <= 0) this.x += dx; //ïðîâåðÿåì, íåò ëè ñòåíû òàì, êóäà õîòèì ïîéòè, è èäåì
-            if (map.get(this.x, this.y + dy) <= 0) this.y += dy;// ïî èêñàì è èãðèêàì îòäåëüíî, ÷òîáû ìîæíî áûëî ñêîëüçèòü âäîëü ñòåíû
-            this.paces += distance; //óâåëè÷èâàåì ïðîéäåííîå ðàññòîÿíèå
+        Player.prototype.walk = function (distance, map) {  //peremeshhenie vpered-nazad (rasstoyanie i karta(chtoby' znat', gde steny'))
+            var dx = Math.cos(this.direction) * distance; //znaya ugol, pod kotory'm idem, i rasstoyanie, kotoroe nuzhno projti, legko 
+            var dy = Math.sin(this.direction) * distance; // proektiruem vsyo na osi
+            if (map.get(this.x + dx, this.y) <= 0) this.x += dx; //proveryaem, net li steny' tam, kuda xotim pojti, i idem
+            if (map.get(this.x, this.y + dy) <= 0) this.y += dy;// po iksam i igrikam otdel'no, chtoby' mozhno by'lo skol'zit' vdol' steny'
+            this.paces += distance; //uvelichivaem projdennoe rasstoyanie
         };
 
 //-----------------------------
 
-        Player.prototype.update = function (controls, map, seconds) { //îáíîâëåíèå êîîðäèíàò ïðè ïåðåìåùåíèèè
-            if (controls.left) this.rotate(-Math.PI * seconds); //ïîâîðîò íà 90 ãðàäóñîâ çà åäèíèöó âðåìåíè
+        Player.prototype.update = function (controls, map, seconds) { //obnovlenie koordinat pri peremeshheniii
+            if (controls.left) this.rotate(-Math.PI * seconds); //povorot na 90 gradusov za edinicu vremeni
             if (controls.right) this.rotate(Math.PI * seconds);
-            if (controls.forward) this.walk(3 * seconds, map); //õîäüáà íà 3 çà åäèíèöó âðåìåíè
-            if (controls.backward) this.walk(-3 * seconds, map);//êàðòà íóæíà, ÷òîáû íå õîäèòü ñêâîçü ñòåíû
+            if (controls.forward) this.walk(3 * seconds, map); //xod'ba na 3 za edinicu vremeni
+            if (controls.backward) this.walk(-3 * seconds, map);//karta nuzhna, chtoby' ne xodit' skvoz' steny'
         };
 //__________________Map_____________________________________________
 
-        function Map(size) { //ñîçäàíèå íîâîé êàðòû óêàçàííîãî ðàçìåðà
-            this.size = size; //ðàçìåð êàðòû
-            this.wallGrid = new Uint8Array(size * size); // ñàìà êàðòà - îäíîìåðíûé ìàñèâ èç òèïîâ áëîêîâ (íèæå áóäåò ìåòîä ïåðåâîäà â äâóìåðíûé è íàîáîðîò)
-            this.skybox = new Bitmap('deathvalley_panorama.jpg', 2000, 750); //òåêñòóðà íåáà è ðàçìåð â ïèêñåëÿõ
-            var wallTexture = new Bitmap('wall_texture.jpg', 1024, 1024); //òåêñòóðà îáû÷íûõ ñòåí è ðàçìåð â ïèêñåëÿõ
-            var tardisTexture = new Bitmap('tardis2.png', 1024, 1024); //òåêñòóðà ïåðåäíåé ÷àñòè áóäêè è ðàçìåð â ïèêñåëÿõ
-            var tardis2Texture = new Bitmap('tardis3.png', 1024, 1024); //òåêñòóðà áîêîâîé è çàäíåé ÷àñòåé áóäêè è ðàçìåð â ïèêñåëÿõ
-            this.light = 0; //îñâåùåíèå êàðòû
-            this.block_height = [0, 2, 0.9];  //âûñîòû áëîêîâ. h[0] = ïóñòîòà h[1] = ñòåíà h[2] = òàðäèñ
-            this.texture = [wallTexture, tardisTexture, tardis2Texture]; //ìàññèâ òåêñòóð
+        function Map(size) { //sozdanie novoj karty' ukazannogo razmera
+            this.size = size; //razmer karty'
+            this.wallGrid = new Uint8Array(size * size); // sama karta - odnomerny'j masiv iz tipov blokov (nizhe budet metod perevoda v dvumerny'j i naoborot)
+            this.skybox = new Bitmap('deathvalley_panorama.jpg', 2000, 750); //tekstura neba i razmer v pikselyax
+            var wallTexture = new Bitmap('wall_texture.jpg', 1024, 1024); //tekstura oby'chny'x sten i razmer v pikselyax
+            var tardisTexture = new Bitmap('tardis2.png', 1024, 1024); //tekstura perednej chasti budki i razmer v pikselyax
+            var tardis2Texture = new Bitmap('tardis3.png', 1024, 1024); //tekstura bokovoj i zadnej chastej budki i razmer v pikselyax
+            this.light = 0; //osveshhenie karty'
+            this.block_height = [0, 2, 0.9];  //vy'soty' blokov. h[0] = pustota h[1] = stena h[2] = tardis
+            this.texture = [wallTexture, tardisTexture, tardis2Texture]; //massiv tekstur
         }
 
 //----------------------------------
 
-        Map.prototype.get = function (x, y) {//íàõîäèò íîìåð ÿ÷åéêè â ìàññèâå ïî êîîðäèíàòàì
-            x = Math.floor(x);//áåðåì öåëóþ ÷àñòü îò òåêóùèõ êîîðäèíàò èãðîêà
+        Map.prototype.get = function (x, y) {//naxodit nomer yachejki v massive po koordinatam
+            x = Math.floor(x);//berem celuyu chast' ot tekushhix koordinat igroka
             y = Math.floor(y);//
-            if (x < 0 || x > this.size - 1 || y < 0 || y > this.size - 1) return -1;//âîçâðàùàåò -1, åñëè èãðîê çà ïðåäåëàìè êàðòû
-            return this.wallGrid[y * this.size + x];//åñëè â ïðåäåëàõ, òî íàõîäèò íîìåð
+            if (x < 0 || x > this.size - 1 || y < 0 || y > this.size - 1) return -1;//vozvrashhaet -1, esli igrok za predelami karty'
+            return this.wallGrid[y * this.size + x];//esli v predelax, to naxodit nomer
         };
 
 //------------------------------------
 
-        Map.prototype.randomize = function () { //ñëó÷àéíàÿ ãåíåðàöèÿ ìèðà
-            for (var i = 0; i < this.size * this.size; i++) { //ïðîõîäèì ïî âñåìó ìàñèâó
-                this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0; // è â êàæäóþ ÿ÷åéêó ñ îïðåäåëåííîé âåðîÿòíîñòüþ ñòàâèì ñòåíó
+        Map.prototype.randomize = function () { //sluchajnaya generaciya mira
+            for (var i = 0; i < this.size * this.size; i++) { //proxodim po vsemu masivu
+                this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
             }
-            for (var j = 0; j < this.size; j++) {                       //ñòàâèì ñòåíû íà 
-                this.wallGrid[j] = 1;                                   //ãðàíèöû êàðòû
+            for (var j = 0; j < this.size; j++) {                       //stavim steny' na 
+                this.wallGrid[j] = 1;                                   //granicy' karty'
                 this.wallGrid[(this.size - 1) + this.size * j] = 1;     //
                 this.wallGrid[this.size * j] = 1;                       //
                 this.wallGrid[this.size * (this.size - 1) + j] = 1;     //
             }
-            var k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//âûáèðàåì ñëó÷àéíóþ ÿ÷åéêó ìàñèâà
-            while (this.wallGrid[k] != 0) {                                         //äî òåõ ïîð, ïîêà
-                k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//îíà íå îêàæåòñÿ ïóñòîé
+            var k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//vy'biraem sluchajnuyu yachejku masiva
+            while (this.wallGrid[k] != 0) {                                         //do tex por, poka
+                k = Math.abs(Math.round(this.size * this.size * Math.random()) - 1);//ona ne okazhetsya pustoj
             }
-            this.wallGrid[k] = 2            //ñòàâèì áóäêó â ýòó ÿ÷åéêó
+            this.wallGrid[k] = 2            //stavim budku v e'tu yachejku
         };
 
 //-----------------------------------
 
-        Map.prototype.cast = function (point, angle, range) { //íàõîäèò ëó÷ âûïóùåííûé èç óêàçàííîé òî÷êè ïîä çàäàííûì óãëîì, íå ïðåâûùóþùèé ïî äëèíå çàäàííîå ðàññòîÿíèå
-            var self = this;                //ëó÷ áóäåì ïðîâîäèòü ïî äàííîé êàðòå
-            var sin = Math.sin(angle);      //äëÿ ñîêðàùåíèÿ ìåñòà è âðåìåíè ñèíóñ
-            var cos = Math.cos(angle);      //è êîñèíóñ óãëà íàõîäèì
-            var noWall = { length2: Infinity };    //íîÂîëë - â ñëó÷àå, åñëè ëó÷ ïàðàëëåëåí îäíîé èç îñè. Òîãäà îí î÷åâèäíî íå ñìîæåò å¸ ïåðåñå÷ü 
-            //ïîä ëó÷îì ïîíèìàåòñÿ ìàññèâ èç ñïèñêà òèïîâ áëîêîâ, êîòîðûå ëó÷ ïåðåñåêàåò, à òàêæå ìåñòå âõîäà â áëîêè
+        Map.prototype.cast = function (point, angle, range) { //naxodit luch vy'pushhenny'j iz ukazannoj tochki pod zadanny'm uglom, ne prevy'shhuyushhij po dline zadannoe rasstoyanie
+            var self = this;                //luch budem provodit' po dannoj karte
+            var sin = Math.sin(angle);      //dlya sokrashheniya mesta i vremeni sinus
+            var cos = Math.cos(angle);      //i kosinus ugla naxodim
+            var noWall = { length2: Infinity };    //noVoll - v sluchae, esli luch parallelen odnoj iz osi. Togda on ochevidno ne smozhet eyo peresech' 
+            //pod luchom ponimaetsya massiv iz spiska tipov blokov, kotory'e luch peresekaet, a takzhe meste vxoda v bloki
             var unsorted_ray = ray({ x: point.x, y: point.y, height: 0, distance: 0, block_type: 0, direction: 'N' });
-            return sorted_ray(unsorted_ray); //ïåðâûé ýëåìåíò - òåêóùàÿ ïîçèöèÿ
+            return sorted_ray(unsorted_ray); //pervy'j e'lement - tekushhaya poziciya
 
 
 
 
             //__________________Ray___________________________________________
 
-            function ray(origin) {       //íà÷èíàåì ìàññèâ ëó÷à ñ ïåðâîãî ýëåìåíòà
-                var stepX = step(sin, cos, origin.x, origin.y); //ïðîâîäèì ëó÷ äî ïåðâîé ãðàíèöû 
-                var stepY = step(cos, sin, origin.y, origin.x, true); //íàõîäèì ïåðåìåùåíèå ïî èêñó è ïî èãðèêó
-                var nextStep = stepX.length2 < stepY.length2    //ñðàâíèâàåì êâàäðàòû ýòèõ ïåðåìåùåíèé, ÷òîáû óçíàòü â êàêîé áëîê ïåðåéäåò ëó÷
-            ? inspect(stepX, 1, 0, origin.distance, stepX.y)    //ëó÷ ïåðåéäåò òóäà, äî êóäà ìåíüøå ðàññòîÿíèå
-            : inspect(stepY, 0, 1, origin.distance, stepY.x);   //ïîýòîìó òåïåðü ëåãêî íàéòè ñëåäóþùèé øàã
-                //â õîäå ïðîâåðêè äëèííà ëèíèè ëó÷à óâåëè÷èëàñü
+            function ray(origin) {       //nachinaem massiv lucha s pervogo e'lementa
+                var stepX = step(sin, cos, origin.x, origin.y); //provodim luch do pervoj granicy' 
+                var stepY = step(cos, sin, origin.y, origin.x, true); //naxodim peremeshhenie po iksu i po igriku
+                var nextStep = stepX.length2 < stepY.length2    //sravnivaem kvadraty' e'tix peremeshhenij, chtoby' uznat' v kakoj blok perejdet luch
+            ? inspect(stepX, 1, 0, origin.distance, stepX.y)    //luch perejdet tuda, do kuda men'she rasstoyanie
+            : inspect(stepY, 0, 1, origin.distance, stepY.x);   //poe'tomu teper' legko najti sleduyushhij shag
+                //v xode proverki dlinna linii lucha uvelichilas'
 
-                if (nextStep.distance > range) return [origin]; //åñëè îíà ïåðåâàëèëè çà ìàêñèìóì, çíà÷èò ëó÷ ãîòîâ
-                return [origin].concat(ray(nextStep));  //åñëè íåò, ðåêóðñèâíî ïðîäîëæàåì
+                if (nextStep.distance > range) return [origin]; //esli ona perevalili za maksimum, znachit luch gotov
+                return [origin].concat(ray(nextStep));  //esli net, rekursivno prodolzhaem
             }
 
             //_________________Sorted_Ray_______________________________________
@@ -187,26 +187,26 @@
             //_________________Step___________________________________________
 
 
-            function step(rise, run, x, y, inverted) {      //èùåì ìåñòî ïåðåñå÷åíèÿ ëó÷à ñî ñëåäóþùèé áëîêîì ïî ãîðèçîíòàëè. Åñëè inverted = true, òî ïî âåðòèêàëè. 
-                if (run === 0) return noWall;   //ïðîâåðÿåì, áóäåò ëè òàêîå ïåðåñå÷åíèå. Åãî ìîæåò íå áûòü, åñëè ëó÷ ïàðàëëåëåí îñè
-                var dx = run > 0 ? Math.floor(x + 1) - x : Math.ceil(x - 1) - x; //íàõîäèì ïåðåìåùåíèå ïî ãîðèçîíòàëè, â çàâèñèìîñòè îò òîãî, âïðàâî èëè âëåâî èäåò ëó÷.
-                var dy = dx * (rise / run); //ïåðåìåùåíèå ïî âåðòèêàëè íàõîäèì, ðåøàÿ ïðÿìîóãîëüíûõ òðåóãîëüíèê
+            function step(rise, run, x, y, inverted) {      //ishhem mesto peresecheniya lucha so sleduyushhij blokom po gorizontali. Esli inverted = true, to po vertikali. 
+                if (run === 0) return noWall;   //proveryaem, budet li takoe peresechenie. Ego mozhet ne by't', esli luch parallelen osi
+                var dx = run > 0 ? Math.floor(x + 1) - x : Math.ceil(x - 1) - x; //naxodim peremeshhenie po gorizontali, v zavisimosti ot togo, vpravo ili vlevo idet luch.
+                var dy = dx * (rise / run); //peremeshhenie po vertikali naxodim, reshaya pryamougol'ny'x treugol'nik
                 return {
-                    x: inverted ? y + dy : x + dx, //âîçâðàùàåì òî÷êó ïåðåñå÷åíèå ñ íîâûì áëîêîì
+                    x: inverted ? y + dy : x + dx, //vozvrashhaem tochku peresechenie s novy'm blokom
                     y: inverted ? x + dx : y + dy,
-                    length2: dx * dx + dy * dy  //è ðàññòîÿíèå, ïðîéäåííîå çà øàã
+                    length2: dx * dx + dy * dy  //i rasstoyanie, projdennoe za shag
                 };
             }
 
             //__________________Inspect_______________________________________
-            //íàõîäèì ñëåäóùèé øàã. 
+            //naxodim sledushhij shag. 
             //
             function inspect(step, shiftX, shiftY, distance, offset) {
-                var dx = cos < 0 ? shiftX : 0;  //äîáàâêè ê êîîðäèíàòàì, ÷òîáû
-                var dy = sin < 0 ? shiftY : 0;  //íàéòè òî÷êó âíóòðè ñëåäóþùåãî áëîêà
-                step.height = self.block_height[self.get(step.x - dx, step.y - dy)]; //óñàíàâëèâàåò îòîáðàæàåìóþ âûñîòó áëîêîâ
-                step.block_type = self.get(step.x - dx, step.y - dy); //íàõîäèò òèï áëîêà, ÷åðåç êîòîðûé ïðîõîäèò ëó÷
-                step.distance = distance + Math.sqrt(step.length2); //óâåëè÷èâàåò ïðîéäèííóþ ëó÷îì äèñòàíöèþ
+                var dx = cos < 0 ? shiftX : 0;  //dobavki k koordinatam, chtoby'
+                var dy = sin < 0 ? shiftY : 0;  //najti tochku vnutri sleduyushhego bloka
+                step.height = self.block_height[self.get(step.x - dx, step.y - dy)]; //usanavlivaet otobrazhaemuyu vy'sotu blokov
+                step.block_type = self.get(step.x - dx, step.y - dy); //naxodit tip bloka, cherez kotory'j proxodit luch
+                step.distance = distance + Math.sqrt(step.length2); //uvelichivaet projdinnuyu luchom distanciyu
                 if (shiftX) {
                     if (cos < 0) { step.shading = 2; step.direction = 'N'; }
                     else { step.shading = 0; step.direction = 'S'; }
@@ -215,118 +215,118 @@
                     if (sin < 0) { step.shading = 2; step.direction = 'E'; }
                     else { step.shading = 1; step.direction = 'W'; }
                 }
-                step.offset = offset - Math.floor(offset);      //íàõîèäèò â êàêîì èìåííî ìåñòå áëîêà ëó÷ ïåðåñåêàþò ãðàíèöó. íåîáõîäèìî äëÿ îòîáðàæåíèÿ íóæíîé ÷àñòè êàðòèíêè
+                step.offset = offset - Math.floor(offset);      //naxoidit v kakom imenno meste bloka luch peresekayut granicu. neobxodimo dlya otobrazheniya nuzhnoj chasti kartinki
                 return step;
             }
         };
 
 //-----------------------------------
 
-        Map.prototype.update = function (seconds) {     //äîáàâëÿåò ìîëíèþ íà êàðòå
-            if (this.light > 0) this.light = Math.max(this.light - 10 * seconds, 0);  //çàòóõàíèå ìîëíèè, åñëè îíà áûëà
-            else if (Math.random() * 5 < seconds) this.light = 2;       //ìîëíèÿ â ñëó÷àéíîå âðåìÿ. 5 - ÷àñòîòà ìîëíèè. 2 - ÿðêîñòü
+        Map.prototype.update = function (seconds) {     //dobavlyaet molniyu na karte
+            if (this.light > 0) this.light = Math.max(this.light - 10 * seconds, 0);  //zatuxanie molnii, esli ona by'la
+            else if (Math.random() * 5 < seconds) this.light = 2;       //molniya v sluchajnoe vremya. 5 - chastota molnii. 2 - yarkost'
         };
 //__________________Camera__________________________________________
 
        function Camera(canvas, resolution, focalLength) {
-            this.ctx = canvas.getContext('2d'); //"Âåðíåò îáúåêò äâóìåðíîãî êîíòåêñòà"??
-            this.width = canvas.width = window.innerWidth * 0.5; //øèðèíà õîëñòà  ÷èñëî 0,5 êàêèì-òî áîêîì îòâå÷àåò çà ðàçðåøåíèå. ÷åì îíî âûøå, òåì èçîáðàæåíèå ëó÷øå
-            this.height = canvas.height = window.innerHeight * 0.5;//âûñîòà õîëñòà
-            this.resolution = resolution; //ðàçðåøåíèå - êîë-âî ïîëîñîê, íà êîòîðûå áóäåì ðàçáèâàòü ýêðàí
-            this.spacing = this.width / resolution; //øèðèíà îäíî ïîëîñêè
-            this.focalLength = focalLength || 0.3; // ðàññòîÿíèå äî "ëèíçû". åñëè çíà÷åíèÿ íåò, òî âåðíåò 0,3
-            this.range = 30; //äëèíà, íà êîòîðîé âèäíû áëîêè
-            this.lightRange = 5; //íàâåðíî çàòóõàíèå ñâåòà
-            this.scale = (this.width + this.height) / 1500; //ñìàõèâàåò íà ìàñøòàá, íî ñòð¸ìíûé
+            this.ctx = canvas.getContext('2d'); //"Vernet ob"ekt dvumernogo konteksta"??
+            this.width = canvas.width = window.innerWidth * 0.5; //shirina xolsta  chislo 0,5 kakim-to bokom otvechaet za razreshenie. chem ono vy'she, tem izobrazhenie luchshe
+            this.height = canvas.height = window.innerHeight * 0.5;//vy'sota xolsta
+            this.resolution = resolution; //razreshenie - kol-vo polosok, na kotory'e budem razbivat' e'kran
+            this.spacing = this.width / resolution; //shirina odno poloski
+            this.focalLength = focalLength || 0.3; // rasstoyanie do "linzy'". esli znacheniya net, to vernet 0,3
+            this.range = 30; //dlina, na kotoroj vidny' bloki
+            this.lightRange = 5; //naverno zatuxanie sveta
+            this.scale = (this.width + this.height) / 1500; //smaxivaet na masshtab, no stryomny'j
         }
 
 //-------------------------------------
 
 
-        Camera.prototype.render = function (player, map) {  //ãëàâíàÿ ôóíêöèÿ îòîáðàæåíèÿ
-            this.drawSky(player.direction, map.skybox, map.light);  //ðèñóåò íåáî
-            this.drawColumns(player, map);  //ñòåíû
-            this.drawWeapon(player.weapon, player.paces); //è îðóæèå
+        Camera.prototype.render = function (player, map) {  //glavnaya funkciya otobrazheniya
+            this.drawSky(player.direction, map.skybox, map.light);  //risuet nebo
+            this.drawColumns(player, map);  //steny'
+            this.drawWeapon(player.weapon, player.paces); //i oruzhie
         };
 
 //------------------------------------
 
-        Camera.prototype.drawSky = function (direction, sky, ambient) { //ðèñóåò íåáî
-            var width = sky.width * (this.height / sky.height) * 2;     //âûñîòà íåáà
-            var left = (direction / CIRCLE) * -width;                   //óñòàíàâëèâàåò íà÷àëüíóþ òî÷êó äëÿ îòîáðàæåíèÿ
+        Camera.prototype.drawSky = function (direction, sky, ambient) { //risuet nebo
+            var width = sky.width * (this.height / sky.height) * 2;     //vy'sota neba
+            var left = (direction / CIRCLE) * -width;                   //ustanavlivaet nachal'nuyu tochku dlya otobrazheniya
 
-            this.ctx.save();                                            //ñîõðàíÿåò õîëñò
+            this.ctx.save();                                            //soxranyaet xolst
             this.ctx.drawImage(sky.image, left, 0, width, this.height);
             if (left < width - this.width) {
                 this.ctx.drawImage(sky.image, left + width, 0, width, this.height);
             }
-            if (ambient > 0) {                                             //ðèñóåò ïîä íèì íåáî
+            if (ambient > 0) {                                             //risuet pod nim nebo
                 this.ctx.fillStyle = '#ffffff';
-                this.ctx.globalAlpha = ambient * 0.1;                       //çàòåìíÿåò ðèñóíîê, ÷òîáû ìîëíèÿ íå ñëèøêîì îñâåòëÿëÿ "çåìëþ"
+                this.ctx.globalAlpha = ambient * 0.1;                       //zatemnyaet risunok, chtoby' molniya ne slishkom osvetlyalya "zemlyu"
                 this.ctx.fillRect(0, this.height * 0.5, this.width, this.height * 0.5);
             }
-            this.ctx.restore();                                             //âîññòàíàâëèâàåò õîëñò
+            this.ctx.restore();                                             //vosstanavlivaet xolst
         };
 
 //--------------------------------------
 
-        Camera.prototype.drawColumns = function (player, map) { //ôóíêöèÿ, ðèñóþùàÿ áëîêè
-            this.ctx.save();                                    //ñîõðàíÿåò õîëñò, ðèñóåò áëîêè
-            for (var column = 0; column < this.resolution; column++) { //öèêë ïî êîë-âó âåðòèêàëüíûõ ïîëîñîê (ðàçðåøåíèå)
-                var x = column / this.resolution - 0.5;                 //íóæíî äëÿ îïðåäåëåíèÿ óãëà, ïîä êîòîðûì ñìîòðèì íà äàííóþ ïîëîñêó. "-0,5" - äëÿ òîãî, ÷òîáû èãðîê áûë â öåíòðå
-                var angle = Math.atan2(x, this.focalLength);           //îïðåäåëÿåò óãîë
-                var ray = map.cast(player, player.direction + angle, this.range); //íàõîäèò ëó÷ - ïîñëåäîâàòåëüíîñòü íåïóñòûõ áëîêîâ è òî÷êè âõîäà â íèõ
+        Camera.prototype.drawColumns = function (player, map) { //funkciya, risuyushhaya bloki
+            this.ctx.save();                                    //soxranyaet xolst, risuet bloki
+            for (var column = 0; column < this.resolution; column++) { //cikl po kol-vu vertikal'ny'x polosok (razreshenie)
+                var x = column / this.resolution - 0.5;                 //nuzhno dlya opredeleniya ugla, pod kotory'm smotrim na dannuyu polosku. "-0,5" - dlya togo, chtoby' igrok by'l v centre
+                var angle = Math.atan2(x, this.focalLength);           //opredelyaet ugol
+                var ray = map.cast(player, player.direction + angle, this.range); //naxodit luch - posledovatel'nost' nepusty'x blokov i tochki vxoda v nix
                // alert(ray.length);
-                this.drawColumn(column, ray, angle, map);       //ðèñóåò ïîëîñêó
+                this.drawColumn(column, ray, angle, map);       //risuet polosku
             }
-            this.ctx.restore();     //âîññòàíàâëèâàåò õîëñò
+            this.ctx.restore();     //vosstanavlivaet xolst
         };
 
 //------------------------------------
 
-        Camera.prototype.drawWeapon = function (weapon, paces) {  //ôóêöèÿ, ðèñóþùàÿ îðóæèå. ïåðåäàåò èçîáðàæåíèå îðóæèÿ è ïîêàçàíèÿ øàãîìåòðà
-            var bobX = Math.cos(paces * 2) * this.scale * 6;    //âû÷èñëÿåò äîáàâêè ê âûñîòå è øèðîòå
-            var bobY = Math.sin(paces * 4) * this.scale * 6;    //äëÿ ýôôåêòà õîäüáû
-            var left = this.width * 0.66 + bobX;    //íàõîäèò êîîðäèíàòû äëÿ âåðõíåé ëåâîé
-            var top = this.height * 0.6 + bobY;     //òî÷êè ðèñóíêà
-            this.ctx.drawImage(weapon.image, left, top, weapon.width * this.scale, weapon.height * this.scale); //ñîáñòâåííî ðèñóåò
-        };                  //(ñàì ðèñóíîê, êîîðäèíàòû âåðõíåé ëåâîé òî÷êà, ìàñøòàá) 
+        Camera.prototype.drawWeapon = function (weapon, paces) {  //fukciya, risuyushhaya oruzhie. peredaet izobrazhenie oruzhiya i pokazaniya shagometra
+            var bobX = Math.cos(paces * 2) * this.scale * 6;    //vy'chislyaet dobavki k vy'sote i shirote
+            var bobY = Math.sin(paces * 4) * this.scale * 6;    //dlya e'ffekta xod'by'
+            var left = this.width * 0.66 + bobX;    //naxodit koordinaty' dlya verxnej levoj
+            var top = this.height * 0.6 + bobY;     //tochki risunka
+            this.ctx.drawImage(weapon.image, left, top, weapon.width * this.scale, weapon.height * this.scale); //sobstvenno risuet
+        };                  //(sam risunok, koordinaty' verxnej levoj tochka, masshtab) 
 
 //---------------------------------
 
-        Camera.prototype.drawColumn = function (column, ray, angle, map) {  //íîìåð âåðò.ïîëîñêè, ëó÷, êîòîðûé ê íåé èäåò, óãîë ëó÷à è êàðòà
+        Camera.prototype.drawColumn = function (column, ray, angle, map) {  //nomer vert.poloski, luch, kotory'j k nej idet, ugol lucha i karta
             if (ray.length > 0) {
-                var ctx = this.ctx;  //õîëñò, íà êîòîðîì ðèñóåì
-                var left = Math.floor(column * this.spacing);   //êîîðäèíàòà êðàéíåé ëåâîé òî÷êè ïîëîñêè íà âñ¸ì õîëñòå
-                var width = Math.ceil(this.spacing);     //øèðèíà ïîëîñêè
+                var ctx = this.ctx;  //xolst, na kotorom risuem
+                var left = Math.floor(column * this.spacing);   //koordinata krajnej levoj tochki poloski na vsyom xolste
+                var width = Math.ceil(this.spacing);     //shirina poloski
 
                 for (var i = ray.length - 1; i >= 0; i--) {
                     var step = ray[i];
-                    var reverse_texture = 0; //ïîêàçûâàåò, íóæíî ëè ðåâåðñèðîâàòü òåêñòóðó äëÿ ïðàâèëüíîãî îòîáðàæåíèÿ (íå çåðêàëüíîãî)
-                    switch (step.block_type) { //â çàâèñèìîñòè îò òèïà áëîêà íàõîäèì íåîáõîäèìóþ òåêñòóðó
+                    var reverse_texture = 0; //pokazy'vaet, nuzhno li reversirovat' teksturu dlya pravil'nogo otobrazheniya (ne zerkal'nogo)
+                    switch (step.block_type) { //v zavisimosti ot tipa bloka naxodim neobxodimuyu teksturu
                         case 1:
                             {
-                                var texture = map.texture[0]; //îïðåäåëÿåì òåêñòóðó ñòåíû
+                                var texture = map.texture[0]; //opredelyaem teksturu steny'
                                 break;
                             }
                         case 2:
                             {
-                                if (step.direction == 'S') var texture = map.texture[1]; //îïðåäåëÿåò òåêñòóðó äëÿ ëèöåâîé
-                                else { var texture = map.texture[2]; reverse_texture = step.direction == 'E' ? 0 : 1; } //à òàêæå áîêîâîé è çàäíåé ÷àñòè òàðäèñ
+                                if (step.direction == 'S') var texture = map.texture[1]; //opredelyaet teksturu dlya licevoj
+                                else { var texture = map.texture[2]; reverse_texture = step.direction == 'E' ? 0 : 1; } //a takzhe bokovoj i zadnej chasti tardis
                                 break;
                             }
                         default:
                             {
-                                var texture = map.texture[0]; //íà âñÿêèé ñëó÷àé 
+                                var texture = map.texture[0]; //na vsyakij sluchaj 
                             }
                     }
-                    textureX = Math.abs(Math.floor(texture.width * (step.offset - reverse_texture))); //îïðåäåëÿåò êîîðäèíàòó ðèñóåìîé ïîëîñêè íà òåêñòóðå, â çàâèñèìîñòè îò 
-                    //òîãî, ïðîèñõîäèò ëè ðåâåðñèÿ òåêñòóðû
-                    var wall = this.project(step.height, angle, step.distance); //íàõîäèì å¸ âûñîòó è âåðõíþþ òî÷êó
-                    ctx.globalAlpha = 1;    //âûáèðàåì ïðîçðà÷íîñòü ñòåíû
-                    ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //ðèñóåì ïîëîñêó, çíàÿ å¸ òåêñòóðó, êîîðäèíàòû âåðõíåé ëåâîé
-                    //òî÷êè ïîëîñêè íà ñàìîé òåêñòóðå, øèðèíó è âûñîòó ïîëîñêè, âåðõíóþ ëåâóþ òî÷êó ïîëîñêè óæå íà õîëñòå, à òàêæå äëèíó è âûñîòó íà õîëñòå
-                    ctx.fillStyle = '#000000';  //çàòåìíÿÿì ñòåíû
+                    textureX = Math.abs(Math.floor(texture.width * (step.offset - reverse_texture))); //opredelyaet koordinatu risuemoj poloski na teksture, v zavisimosti ot 
+                    //togo, proisxodit li reversiya tekstury'
+                    var wall = this.project(step.height, angle, step.distance); //naxodim eyo vy'sotu i verxnyuyu tochku
+                    ctx.globalAlpha = 1;    //vy'biraem prozrachnost' steny'
+                    ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //risuem polosku, znaya eyo teksturu, koordinaty' verxnej levoj
+                    //tochki poloski na samoj teksture, shirinu i vy'sotu poloski, verxnuyu levuyu tochku poloski uzhe na xolste, a takzhe dlinu i vy'sotu na xolste
+                    ctx.fillStyle = '#000000';  //zatemnyayam steny'
                     ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
                     ctx.fillRect(left, wall.top, width, wall.height);
                 }
@@ -337,11 +337,11 @@
 //-------------------------------
 
         Camera.prototype.project = function (height, angle, distance) {
-            var z = distance * Math.cos(angle);     //íàõîäèì óñëîâíóþ äëèíó, èíà÷å áóäåò êàçàòüñÿ, ñëîâíî ñìîòðèì â ãëàçîê
-            var wallHeight = this.height * height / z;  //íàõîäèì âèäèìóþ âûñîòó ñòåíû. ÷åì ñòåíà äàëüøå, òåì îíà âèçóàëüíî ìåíüøå
-            var bottom = this.height / 2 * (1 + 1 / z); //íàõîäèò íèæíþþ òî÷êó ñòåíû
+            var z = distance * Math.cos(angle);     //naxodim uslovnuyu dlinu, inache budet kazat'sya, slovno smotrim v glazok
+            var wallHeight = this.height * height / z;  //naxodim vidimuyu vy'sotu steny'. chem stena dal'she, tem ona vizual'no men'she
+            var bottom = this.height / 2 * (1 + 1 / z); //naxodit nizhnyuyu tochku steny'
             return {
-                top: bottom - wallHeight,   //âû÷èñëÿåò âåðõíþþ òî÷êó ñòåíû, çíàÿ íèæíþþ è âûñîòó
+                top: bottom - wallHeight,   //vy'chislyaet verxnyuyu tochku steny', znaya nizhnyuyu i vy'sotu
                 height: wallHeight         
             };
         };
@@ -349,7 +349,7 @@
 //______________________GameLoop____________________________________
 
 
-        function GameLoop() {  //çàöèêëèâàíèå èãðû
+        function GameLoop() {  //zaciklivanie igry'
             this.frame = this.frame.bind(this);
             this.lastTime = 0;
             this.callback = function () { };
@@ -373,13 +373,13 @@
 
 //______________________Main________________________________________
         var display = document.getElementById('display');
-        var player = new Player(5.5, 5.5, Math.PI * 0.3); //èãðîê â óêàçàííûõ êîîðäèíàòàõ è íàïðàâëåíèåì âçãëÿäà
-        var map = new Map(50); //íîâàÿ êàðòà óêàçàííîãî ðàçìåðà 
-        var controls = new Controls(); //çàäàåò óïðàâëåíèå ïåðñîíàæåì
-        var camera = new Camera(display,320, 0.3); //(ýêðàí, íà êîòîðîì ðàáîòàåì ; ðàçðåøåíèå (êîë-âî ïîëîñîê) ; øèðèíà çðåíèÿ)
-        var loop = new GameLoop(); //çàöèêëèâàíèå
+        var player = new Player(5.5, 5.5, Math.PI * 0.3); //igrok v ukazanny'x koordinatax i napravleniem vzglyada
+        var map = new Map(50); //novaya karta ukazannogo razmera 
+        var controls = new Controls(); //zadaet upravlenie personazhem
+        var camera = new Camera(display,320, 0.3); //(e'kran, na kotorom rabotaem ; razreshenie (kol-vo polosok) ; shirina zreniya)
+        var loop = new GameLoop(); //zaciklivanie
 
-        map.randomize();  //ðàíäîìèçàöèÿ êàðòû
+        map.randomize();  //randomizaciya karty'
 
         loop.start(function frame(seconds) {
             map.update(seconds);
