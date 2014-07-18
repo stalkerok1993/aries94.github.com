@@ -12,6 +12,9 @@
 //________________Controls_____________________________________
         var CIRCLE = Math.PI * 2;
         var MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)
+        var angle_is_known = false;
+        var knovw_angle = 0;
+        var second_known_angle = 0;
 
 
         function Controls() {
@@ -106,6 +109,7 @@
             var wallTexture = new Bitmap('wall_texture.jpg', 1024, 1024); //tekstura oby'chny'x sten i razmer v pikselyax
             var tardisTexture = new Bitmap('tardis2.png', 1024, 1024); //tekstura perednej chasti budki i razmer v pikselyax
             var tardis2Texture = new Bitmap('tardis3.png', 1024, 1024); //tekstura bokovoj i zadnej chastej budki i razmer v pikselyax
+            this.tardis_bowlTexture = new Bitmap('tardis_bowl.png',1024,768);
             this.light = 0; //osveshhenie karty'
             this.block_height = [0, 2, 0.9];  //vy'soty' blokov. h[0] = pustota h[1] = stena h[2] = tardis
             this.texture = [wallTexture, tardisTexture, tardis2Texture]; //massiv tekstur
@@ -122,17 +126,17 @@
 
 //------------------------------------
 
-        Map.prototype.randomize = function () { //sluchajnaya generaciya mira
+        Map.prototype.randomize = function (docta) { //sluchajnaya generaciya mira
             for (var i = 0; i < this.size; i++) { //proxodim po vsemu masivu
                 for (var j = 1; j < this.size - 1; j++) {
-                    this.wallGrid[i][j] = Math.random() < 0.3 ? 1 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
+                    this.wallGrid[i][j] = Math.random() < 0.3 ? 0 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
                 }
             }
             for (var j = 0; j < this.size; j++) {                       //stavim steny' na 
                 this.wallGrid[0][j] = 1;                                   //granicy' karty'
                 this.wallGrid[this.size - 1][j] = 1;     //
                 this.wallGrid[j][0] = 1;                       //
-                this.wallGrid[j][this.size - 1]  =1   //
+                this.wallGrid[j][this.size - 1] = 1   //
             }
             var k = Math.floor(Math.abs(Math.random() * this.size - 1));
             var l = Math.floor(Math.abs(Math.random() * this.size - 1));
@@ -141,16 +145,23 @@
                 l = Math.floor(Math.abs(Math.random() * this.size - 1));
             }
             this.wallGrid[k][l] = 2;
-
-            var gread = "";
-            for (var m = 0; m < this.size * this.size; m++) {
-                if (m != 0 && m % this.size == 0)
-                    gread += "\n";
-                l = m % this.size;
-                k = (m - l) / this.size;          
-                gread += this.wallGrid[k][l] + ", ";
+            var k = Math.floor(Math.abs(Math.random() * this.size - 1));
+            var l = Math.floor(Math.abs(Math.random() * this.size - 1));
+            while (this.wallGrid[k][l] != 0 /*&& this.path_exists()*/) {
+                k = Math.floor(Math.abs(Math.random() * this.size - 1));
+                l = Math.floor(Math.abs(Math.random() * this.size - 1));
             }
-            alert(gread);
+            player.x = k + 0.5;
+            player.x = l + 0.5;
+            /* var gread = "";
+            for (var m = 0; m < this.size * this.size; m++) {
+            if (m != 0 && m % this.size == 0)
+            gread += "\n";
+            l = m % this.size;
+            k = (m - l) / this.size;          
+            gread += this.wallGrid[k][l] + ", ";
+            }
+            alert(gread);*/
 
 
         };
@@ -299,10 +310,11 @@
                 var x = column / this.resolution - 0.5;                 //nuzhno dlya opredeleniya ugla, pod kotory'm smotrim na dannuyu polosku. "-0,5" - dlya togo, chtoby' igrok by'l v centre
                 var angle = Math.atan2(x, this.focalLength);           //opredelyaet ugol
                 var ray = map.cast(player, player.direction + angle, this.range); //naxodit luch - posledovatel'nost' nepusty'x blokov i tochki vxoda v nix
-               // alert(ray.length);
+                // alert(ray.length);
                 this.drawColumn(column, ray, angle, map);       //risuet polosku
             }
             this.ctx.restore();     //vosstanavlivaet xolst
+            angle_is_known = false;
         };
 
 //------------------------------------
@@ -336,6 +348,7 @@
                             {
                                 if (step.direction == 'S') var texture = map.texture[1]; //opredelyaet teksturu dlya licevoj
                                 else { var texture = map.texture[2]; reverse_texture = step.direction == 'E' ? 0 : 1; } //a takzhe bokovoj i zadnej chasti tardis
+                                if (!angle_is_known) { angle_is_known = true; knovw_angle = angle};
                                 break;
                             }
                         default:
@@ -352,6 +365,10 @@
                     ctx.fillStyle = '#000000';  //zatemnyayam steny'
                     ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
                     ctx.fillRect(left, wall.top, width, wall.height);
+                  /*  if (step.block_type == 2) {
+                        ctx.globalAlpha = 1;
+                        ctx.drawImage(map.tardis_bowlTexture.image, Math.floor(map.tardis_bowlTexture.width * (1 - step.offset) * Math.sin(angle)), 0, 1, map.tardis_bowlTexture.height, left, wall.top, width, wall.height);
+                    };*/
                 }
             }
         };
@@ -406,7 +423,11 @@
         var loop = new GameLoop(); //zaciklivanie
 
        // alert();
-        map.randomize();  //randomizaciya karty'
+        map.randomize(player);  //randomizaciya karty'
+
+        var audio = new Audio();
+        audio.src = 'tardis1.wav';
+        audio.autoplay = true;
 
         loop.start(function frame(seconds) {
             map.update(seconds);
