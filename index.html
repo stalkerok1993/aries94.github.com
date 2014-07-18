@@ -195,7 +195,7 @@
         Map.prototype.randomize = function (docta) { //sluchajnaya generaciya mira
             for (var i = 0; i < this.size; i++) { //proxodim po vsemu masivu
                 for (var j = 1; j < this.size - 1; j++) {
-                    this.wallGrid[i][j] = Math.random() < 0.3 ? 0 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
+                    this.wallGrid[i][j] = Math.random() < 0.3 ? 1 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
                 }
             }
             for (var j = 0; j < this.size; j++) {                       //stavim steny' na 
@@ -431,9 +431,9 @@
                     ctx.globalAlpha = texture == map.texture[0] ? 1 : tardis.alpha;    //vy'biraem prozrachnost' steny'
                     ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //risuem polosku, znaya eyo teksturu, koordinaty' verxnej levoj
                     //tochki poloski na samoj teksture, shirinu i vy'sotu poloski, verxnuyu levuyu tochku poloski uzhe na xolste, a takzhe dlinu i vy'sotu na xolste
-                 /*   ctx.fillStyle = '#000000';  //zatemnyayam steny'
+                    ctx.fillStyle = '#000000';  //zatemnyayam steny'
                     ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
-                    ctx.fillRect(left, wall.top, width, wall.height);*/
+                    ctx.fillRect(left, wall.top, width, wall.height);
                   /*  if (step.block_type == 2) {
                         ctx.globalAlpha = 1;
                         ctx.drawImage(map.tardis_bowlTexture.image, Math.floor(map.tardis_bowlTexture.width * (1 - step.offset) * Math.sin(angle)), 0, 1, map.tardis_bowlTexture.height, left, wall.top, width, wall.height);
@@ -484,7 +484,7 @@
        // alert();
         var display = document.getElementById('display');
        // alert();
-        var map = new Map(10); //novaya karta ukazannogo razmera       
+        var map = new Map(50); //novaya karta ukazannogo razmera       
        // alert(); 
         var player = new Player(Math.PI * 0.3); //igrok v ukazanny'x koordinatax i napravleniem vzglyada
         var tardis = new Tardis('N');
