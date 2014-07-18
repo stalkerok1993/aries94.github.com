@@ -21,8 +21,8 @@
 
         function Controls() {
             //   this.codes = { 37: 'left', 39: 'right', 38: 'forward', 40: 'backward' };
-            this.codes = { 65: 'left', 68: 'right', 87: 'forward', 83: 'backward' };
-            this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false };
+            this.codes = { 65: 'left', 68: 'right', 87: 'forward', 83: 'backward', 69: 'action' };
+            this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false, 'action': false };
             document.addEventListener('keydown', this.onKey.bind(this, true), false);
             document.addEventListener('keyup', this.onKey.bind(this, false), false);
             document.addEventListener('touchstart', this.onTouch.bind(this), false);
@@ -110,34 +110,60 @@
             this.direction = direction; //doors_direction
             this.textrure = new Bitmap('tardis3.png', 1024, 1024); //textura bokovoi chasti
             this.doors_textrure = new Bitmap('tardis3.png', 1024, 1024); //textura lichevoi chasti
-            this.alpha = 1 //prozrachnost` budki 
+            this.alpha = 1 //prozrachnost` budki
+            this.moving_alpha = [ 1, 1, 0.5, 0.75, 0.25, 0.5, 0 , 0 ];
+            this.current_stage = 1;
+            this.state = ["standing", "appearing", "disappearing", "not here"];
+            this.current_state = "standing";
         }
 
 //---------------------------------
-
-        Tardis.prototype.update = function (seconds, map) {
-            if (alpha_flag && alpha_timer == 0) { this.alpha = this.alpha < 0.05 ? 0 : Math.abs(this.alpha - 0.05);  };
-            if (alpha_flag && this.alpha == 0 && alpha_timer == 0) {
-                map.wallGrid[this.x][this.y] = 0;
-                alpha_timer = 0;
-                alpha_flag = false;
+        Tardis.prototype.update = function (controls, seconds, map, audio) {
+            if (this.current_state == "standing") {
+                if (controls.action) { this.current_state = "disappearing"; audio.play(); };
             };
-            if (!alpha_flag && alpha_timer <= 2) { alpha_timer += 0.05; };
-            if (!alpha_flag && alpha_timer >= 2) {
-                var k = Math.floor(Math.abs(Math.random() * map.size - 1));
-                var l = Math.floor(Math.abs(Math.random() * map.size - 1));
-                while (map.wallGrid[k][l] != 0 /*&& this.path_exists()*/) {
-                    k = Math.floor(Math.abs(Math.random() * map.size - 1));
-                    l = Math.floor(Math.abs(Math.random() * map.size - 1));
-                }
-                map.wallGrid[k][l] = 2;
-                this.x = k;
-                this.y = l;
-                alpha_flag = true;
+            if (this.current_state == "not here") {
+                if (controls.action) this.current_state = "appearing";
             };
-            if (alpha_flag & alpha_timer >= 2) { this.alpha = this.alpha > 1 ? 1 : this.alpha + 0.05;  };
-            if (alpha_flag && this.alpha == 1) { alpha_timer = 0;  };
+            if (this.current_state == "disappearing") {
+                this.current_stage = this.moving(this.current_stage, 1);
+                if (this.current_stage == this.moving_alpha.length - 1) { this.current_state = "not here"; audio.pause(); audio.load() };
+            };
+            if (this.current_state == "appearing") {
+                this.current_stage = this.moving(this.current_stage, -1);
+                if (this.current_stage == 1) { this.current_state = "standing" };
+            };
         };
+
+        Tardis.prototype.moving = function (stage, factor) {
+            var speed = 0.025;
+            if (stage <= this.moving_alpha.length - 1 && stage >= 0) {
+                var mult = this.moving_alpha[stage] >= this.moving_alpha[stage + factor] ? -1 : 1;
+                this.alpha = this.alpha + mult * speed >= 0 ? this.alpha + mult * speed : 0;
+                switch (mult) {
+                    case 1:
+                        {
+                            if (this.alpha >= this.moving_alpha[stage + factor]) { return (stage + factor); }
+                            else { return (stage) };
+                        }
+                    case -1:
+                        {
+                            if (this.alpha <= this.moving_alpha[stage + factor]) { return (stage + factor) }
+                            else { return (stage); };
+                        }
+                    default:
+                        {
+                            alert("Tardis Moving Stage Error 1");
+                            return -1
+                        }
+                };
+            }
+            else {
+                alert("Tardis Moving Stage Error 2");
+                return -1
+            };
+        };
+         
 
 //__________________Map_____________________________________________
 
@@ -469,14 +495,14 @@
        // alert();
         map.randomize(player, tardis);  //randomizaciya karty'
 
-      /*  var audio = new Audio();
-        audio.src = 'tardis1.wav';
-        audio.autoplay = true;*/
+        var audio = new Audio();
+        audio.src = 'tardis.wav';
+        audio.paused = true;
 
         loop.start(function frame(seconds) {
             map.update(seconds);
             player.update(controls.states, map, seconds);
-            tardis.update(seconds, map);
+            tardis.update(controls.states, seconds, map, audio);
             camera.render(player, map, tardis);
         });
 
