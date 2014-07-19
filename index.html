@@ -120,18 +120,33 @@
 //---------------------------------
         Tardis.prototype.update = function (controls, seconds, map, audio) {
             if (this.current_state == "standing") {
-                if (controls.action) { this.current_state = "disappearing"; audio.play(); };
+                if (controls.action) {
+                    this.current_state = "disappearing"; audio.play();
+                };
             };
             if (this.current_state == "not here") {
-                if (controls.action) this.current_state = "appearing";
+                if (controls.action) {
+                    this.current_state = "appearing";
+                    var coord = map.get_random();
+                    this.x = coord.x;
+                    this.y = coord.y;
+                    map.wallGrid[this.x][this.y] = 2;
+                };
             };
             if (this.current_state == "disappearing") {
                 this.current_stage = this.moving(this.current_stage, 1);
-                if (this.current_stage == this.moving_alpha.length - 1) { this.current_state = "not here"; audio.pause(); audio.load() };
+                if (this.current_stage == this.moving_alpha.length - 1) {
+                    this.current_state = "not here";
+                    audio.pause();
+                    audio.load();
+                    map.wallGrid[this.x][this.y] = 0;
+                };
             };
             if (this.current_state == "appearing") {
                 this.current_stage = this.moving(this.current_stage, -1);
-                if (this.current_stage == 1) { this.current_state = "standing" };
+                if (this.current_stage == 1) {
+                    this.current_state = "standing"
+                };
             };
         };
 
@@ -192,7 +207,19 @@
 
 //------------------------------------
 
-        Map.prototype.randomize = function (docta) { //sluchajnaya generaciya mira
+        Map.prototype.get_random = function () {
+            var k, l;
+            do {
+                k = Math.floor(Math.abs(Math.random() * this.size - 1));
+                l = Math.floor(Math.abs(Math.random() * this.size - 1));
+            }
+            while (this.wallGrid[k][l] != 0);
+            return { x: k, y: l};
+        };
+
+//------------------------------------
+
+        Map.prototype.randomize = function (player, tardis) { //sluchajnaya generaciya mira
             for (var i = 0; i < this.size; i++) { //proxodim po vsemu masivu
                 for (var j = 1; j < this.size - 1; j++) {
                     this.wallGrid[i][j] = Math.random() < 0.3 ? 0 : 0; // i v kazhduyu yachejku s opredelennoj veroyatnost'yu stavim stenu
@@ -204,24 +231,18 @@
                 this.wallGrid[j][0] = 1;                       //
                 this.wallGrid[j][this.size - 1] = 1   //
             }
-            var k = Math.floor(Math.abs(Math.random() * this.size - 1));
-            var l = Math.floor(Math.abs(Math.random() * this.size - 1));
-            while (this.wallGrid[k][l] != 0 /*&& this.path_exists()*/) {
-                k = Math.floor(Math.abs(Math.random() * this.size - 1));
-                l = Math.floor(Math.abs(Math.random() * this.size - 1));
-            }
-            this.wallGrid[k][l] = 2;
-            tardis.x = k;
-            tardis.y = l;
 
-            var k = Math.floor(Math.abs(Math.random() * this.size - 1));
-            var l = Math.floor(Math.abs(Math.random() * this.size - 1));
-            while (this.wallGrid[k][l] != 0 /*&& this.path_exists()*/) {
-                k = Math.floor(Math.abs(Math.random() * this.size - 1));
-                l = Math.floor(Math.abs(Math.random() * this.size - 1));
-            }
-            player.x = k + 0.5;
-            player.y = l + 0.5;
+            var coord = this.get_random(); //funkciya vybora sluchainoi svobodnoi tochki
+
+            this.wallGrid[coord.x][coord.y] = 2;
+            tardis.x = coord.x;
+            tardis.y = coord.y;
+
+            coord = this.get_random();
+            player.x = coord.x + 0.5;
+            player.y = coord.y + 0.5;
+
+
             /* var gread = "";
             for (var m = 0; m < this.size * this.size; m++) {
             if (m != 0 && m % this.size == 0)
