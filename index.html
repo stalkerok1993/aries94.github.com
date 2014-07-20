@@ -456,48 +456,53 @@
 //---------------------------------
 
 
-        Camera.prototype.drawColumn = function (column, ray, angle, map, tardis) {
+        Camera.prototype.drawColumn = function (column, ray, angle, map, tardis, range) {
             if (ray.length > 0) {
                 var ctx = this.ctx;  //xolst, na kotorom risuem
                 var left = Math.floor(column * this.spacing);   //koordinata krajnej levoj tochki poloski na vsyom xolste
                 var width = Math.ceil(this.spacing);     //shirina poloski
 
-                for (var i = ray.length - 1; i >= 0; i--) {
-                    var step = ray[i];
-                    var reverse_texture = 0; //pokazy'vaet, nuzhno li reversirovat' teksturu dlya pravil'nogo otobrazheniya (ne zerkal'nogo)
-
-                    switch (step.block_type) { //v zavisimosti ot tipa bloka naxodim neobxodimuyu teksturu
-                        case Wall_Block:
-                            {
-                                var texture = map.texture[Wall_Block]; //opredelyaem teksturu steny'
-                                ctx.globalAlpha = 1; //vy'biraem prozrachnost' steny'
-                                var alpha_factor = 1;
-                                break;
-                            }
-                        case Tardis_Block:
-                            {
-                                if (step.direction == 'S') var texture = map.texture[Tardis_Block_Doors]; //opredelyaet teksturu dlya licevoj
-                                else { var texture = map.texture[Tardis_Block]; reverse_texture = step.direction == 'E' ? 0 : 1; } //a takzhe bokovoj i zadnej chasti tardis
-                                ctx.globalAlpha = tardis.alpha;
-                                var alpha_factor = tardis.alpha;
-                                break;
-                            }
-                        default:
-                            {
-                                var texture = map.texture[Wall_Block]; //na vsyakij sluchaj 
-                            }
-                    };
-                    textureX = Math.abs(Math.floor(texture.width * (step.offset - reverse_texture))); //opredelyaet koordinatu risuemoj poloski na teksture, v zavisimosti ot 
-                    //togo, proisxodit li reversiya tekstury'
-                    var wall = this.project(step.height, angle, step.distance); //naxodim eyo vy'sotu i verxnyuyu tochku
-                    ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //risuem polosku, znaya eyo teksturu, koordinaty' verxnej levoj
-                    //tochki poloski na samoj teksture, shirinu i vy'sotu poloski, verxnuyu levuyu tochku poloski uzhe na xolste, a takzhe dlinu i vy'sotu na xolste
-
-                    ctx.fillStyle = '#000000';  //zatemnyayam steny'
-                    ctx.globalAlpha = Math.min(Math.max((step.distance + step.shading) / this.lightRange - map.light, 0), alpha_factor);
-                    ctx.fillRect(left, wall.top, width, wall.height);
-
-
+                for (var i = range - 1; i >= 0; i--) {
+                    var rainDrops = Math.pow(Math.random(), 3) * s;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.globalAlpha = 0.15;
+                    while (--rainDrops > 0) ctx.fillRect(left, Math.random() * rain.top, 1, rain.height);
+                    
+                    if (ray[i]) {
+                        var step = ray[i];
+                        var reverse_texture = 0; //pokazy'vaet, nuzhno li reversirovat' teksturu dlya pravil'nogo otobrazheniya (ne zerkal'nogo)
+    
+                        switch (step.block_type) { //v zavisimosti ot tipa bloka naxodim neobxodimuyu teksturu
+                            case Wall_Block:
+                                {
+                                    var texture = map.texture[Wall_Block]; //opredelyaem teksturu steny'
+                                    ctx.globalAlpha = 1; //vy'biraem prozrachnost' steny'
+                                    var alpha_factor = 1;
+                                    break;
+                                }
+                            case Tardis_Block:
+                                {
+                                    if (step.direction == 'S') var texture = map.texture[Tardis_Block_Doors]; //opredelyaet teksturu dlya licevoj
+                                    else { var texture = map.texture[Tardis_Block]; reverse_texture = step.direction == 'E' ? 0 : 1; } //a takzhe bokovoj i zadnej chasti tardis
+                                    ctx.globalAlpha = tardis.alpha;
+                                    var alpha_factor = tardis.alpha;
+                                    break;
+                                }
+                            default:
+                                {
+                                    var texture = map.texture[Wall_Block]; //na vsyakij sluchaj 
+                                }
+                        };
+                        textureX = Math.abs(Math.floor(texture.width * (step.offset - reverse_texture))); //opredelyaet koordinatu risuemoj poloski na teksture, v zavisimosti ot 
+                        //togo, proisxodit li reversiya tekstury'
+                        var wall = this.project(step.height, angle, step.distance); //naxodim eyo vy'sotu i verxnyuyu tochku
+                        ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); //risuem polosku, znaya eyo teksturu, koordinaty' verxnej levoj
+                        //tochki poloski na samoj teksture, shirinu i vy'sotu poloski, verxnuyu levuyu tochku poloski uzhe na xolste, a takzhe dlinu i vy'sotu na xolste
+    
+                        ctx.fillStyle = '#000000';  //zatemnyayam steny'
+                        ctx.globalAlpha = Math.min(Math.max((step.distance + step.shading) / this.lightRange - map.light, 0), alpha_factor);
+                        ctx.fillRect(left, wall.top, width, wall.height);
+                    }
                 };/*
                 for (var i = Math.floor(ray[ray.length - 1].distance); i >= 0; i--) {
                     var rainDrops = Math.pow(Math.random(), 3) * i;
